@@ -27,15 +27,10 @@ library(ggplot2)
 
 # Struktur Repositori
 Tugas-Besar-ADS-2025/
-data/
-└──Dataset Tugas Besar ADS 2025.csv
-src/
-└──analysis.Rmd          # Source code utama (R Markdown)
-output/
-└──grafik/               # Semua hasil visualisasi
-└──hasil_analisis/       # Hasil uji statistik dan interpretasi
-README.md                 # Dokumentasi proyek
-LICENSE (opsional)
+data : Dataset Tugas Besar ADS 2025.csv
+src : analysis.Rmd #Source code utama (R Markdown)
+output : grafik #Semua hasil visualisasi, hasil_analisis # Hasil uji statistik dan interpretasi
+README.md # Dokumentasi proyek
 
 # Cara Menjalankan Script
 1. Clone repositori : git clone https://github.com/username/Tugas-Besar-ADS-2025.git
@@ -47,12 +42,12 @@ Dataset berisi data mahasiswa ITERA dengan beberapa variabel terkait akademik da
 Kolom yang digunakan dalam analisis ini:
 1. Program Studi dikategorikan menjadi: Sains Data dan Non–Sains Data
 2. IPK melalui proses pembersihan: Mengganti koma menjadi titik, Mengambil angka valid, Membuang nilai tidak wajar (≤0 atau >4)
-3. Status Beasiswa → diolah menjadi: Penerima Beasiswa, Non-Beasiswa
+3. Status Beasiswa diolah menjadi: Penerima Beasiswa, Non-Beasiswa
 
 # Metode Analisis
-1. Pembersihan Data : Standarisasi penulisan IPK, Penanganan karakter non-alfabet pada nama prodi, Pengelompokan “Sains Data vs Non–Sains Data”
+1. Pembersihan Data : Standarisasi penulisan IPK, Penanganan karakter non alfabet pada nama prodi, Pengelompokan “Sains Data vs Non Sains Data”
 2. Eksplorasi Data & Visualisasi : Histogram IPK, Boxplot IPK tiap kelompok, Violin plot, Density plot, QQ Plot (cek normalitas residual)
-3. Uji Hipotesis : Uji t satu sampel, Menguji apakah rata-rata IPK mahasiswa > 3.00, Uji t dua sampel (independen), IPK Sains Data vs Non–Sains Data, IPK Penerima Beasiswa vs Non-Beasiswa, Visualisasi kurva distribusi t + daerah p-value
+3. Uji Hipotesis : Uji t satu sampel, Menguji apakah rata-rata IPK mahasiswa > 3.00, Uji t dua sampel (independen), IPK Sains Data vs Non Sains Data, IPK Penerima Beasiswa vs Non Beasiswa, Visualisasi kurva distribusi t dan daerah p-value
 
 # Ringkasan Temuan (isi setelah analisis jadi)
 Tambahkan ringkasan hasilmu, contoh format: Rata-rata IPK mahasiswa ITERA adalah, Tidak atau ada perbedaan signifikan pada IPK berdasarkan kelompok prodi, Tidak atau ada perbedaan signifikan pada IPK berdasarkan status beasiswa, Rata-rata IPK terbukti lebih besar dari 3.00 gagal dibuktikan
