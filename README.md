@@ -1,6 +1,6 @@
 # Tugas Besar ADS 2025 Kelompok 2 RB
 # Analisis Perbedaan Rata-Rata Indeks Prestasi Kumulatif (IPK) Mahasiswa ITERA Menggunakan Uji Hipotesis Satu Populasi dan Dua Populasi
-Anggota Kelompok :
+# Anggota Kelompok :
 1. Muhammas Syafiqul Falakh_124450099
 2. Hani Qurrota Aini_124450020
 3. Adinda Deswita Maharani_124450083
@@ -20,10 +20,10 @@ Variabel utama yang dianalisis:
 
 # Paket R yang Digunakan
 Script menggunakan beberapa library berikut:
-library(readr)
-library(dplyr)
-library(stringr)
-library(ggplot2)
+1. library(readr)
+2. library(dplyr)
+3. library(stringr)
+4. library(ggplot2)
 
 # Struktur Repositori
 Tugas-Besar-ADS-2025/
