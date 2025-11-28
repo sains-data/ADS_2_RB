@@ -1,0 +1,478 @@
+---
+title: "Analisis Perbedaan Rata-Rata Indeks Prestasi Kumulatif (IPK) Mahasiswa ITERA Menggunakan Uji Hipotesis Satu Populasi dan Dua Populasi: Studi Berdasarkan Variabel Demografis dan Sosial Akademik"
+author: "Kelompok2_ADS_RB"
+date: "2025-11-26"
+output: html_document
+---
+
+```{r}
+# ============================
+# 1. Load Library
+# ============================
+library(readr)
+library(dplyr)
+library(readr)
+library(stringr)
+library(ggplot2)
+
+```
+
+```{r}
+# ============================
+# 2. Load Dataset
+# ============================
+raw_df <- read_csv("C:/Users/Adind/Downloads/Dataset Tugas Besar ADS 2025.csv",
+                   show_col_types = FALSE)
+
+# Rename kolom penting
+df <- raw_df %>%
+  dplyr::rename(
+    program_studi = 2,
+    ipk_raw       = 3,
+    beasiswa_raw  = 9
+  )
+
+head(df)
+glimpse(df)
+
+```
+
+```{r}
+# ============================
+# 3. Cleaning Kolom IPK
+# ============================
+
+clean_ipk <- function(text) {
+  text_clean <- tolower(str_trim(as.character(text)))
+  text_clean <- str_replace_all(text_clean, ",", ".")
+  ipk_num <- as.numeric(str_extract(text_clean, "\\d+(\\.\\d+)?"))
+  
+  if (is.na(ipk_num) || ipk_num <= 0 || ipk_num > 4) return(NA_real_)
+  return(ipk_num)
+}
+
+df <- df %>%
+  mutate(ipk = sapply(ipk_raw, clean_ipk))
+
+df_clean <- df %>%
+  filter(!is.na(ipk))
+
+summary(df_clean$ipk)
+head(df_clean)
+```
+
+```{r}
+# ============================
+# 4. Cek Isi Prodi & Beasiswa
+# ============================
+
+unique(df_clean$program_studi)
+unique(df_clean$beasiswa_raw)
+```
+
+```{r}
+# ============================
+# 5. Membuat Grup Prodi
+# ============================
+
+library(stringr)
+
+df_clean <- df_clean %>%
+  mutate(
+    program_studi_bersih = tolower(program_studi),
+    program_studi_bersih = str_replace_all(program_studi_bersih, "[^a-z ]", " "),
+    program_studi_bersih = str_squish(program_studi_bersih),
+    grup_prodi = ifelse(
+      program_studi_bersih %in% c("sains data", "sains   data", "sain data"),
+      "Sains Data",
+      "Non–Sains Data"
+)
+)
+
+table(df_clean$grup_prodi)
+```
+
+```{r}
+# ============================
+# 6. Membuat Grup Beasiswa
+# ============================
+
+df_clean <- df_clean %>%
+  mutate(
+    beasiswa_bersih = tolower(str_trim(as.character(beasiswa_raw))),
+    grup_beasiswa = case_when(
+      str_detect(beasiswa_bersih, "ya") ~ "Penerima Beasiswa",
+      str_detect(beasiswa_bersih, "tidak") ~ "Non-Beasiswa",
+      TRUE ~ NA_character_
+    )
+  )
+
+table(df_clean$grup_beasiswa, useNA = "ifany")
+
+# Data khusus untuk analisis beasiswa (buang NA)
+df_beasiswa <- df_clean %>%
+  filter(!is.na(grup_beasiswa))
+```
+
+#### Grafik Deskriptif
+
+```{r}
+# ============================
+# 7. Histogram IPK
+# ============================
+
+ggplot(df_clean, aes(x = ipk)) +
+  geom_histogram(bins = 20, fill = "skyblue") +
+  labs(title = "Histogram IPK Mahasiswa ITERA",
+       x = "IPK", y = "Frekuensi") +
+ theme_minimal()
+```
+
+```{r}
+# ============================
+# 8. Box Plot IPK Prodi
+# ============================
+
+
+ggplot(df_clean, aes(x = grup_prodi, y = ipk)) +
+  geom_boxplot(fill = "orange") +
+  labs(title = "IPK: Sains Data vs Non–Sains Data",
+       x = "Grup Prodi", y = "IPK") +
+ theme_minimal()
+```
+
+```{r}
+# ============================
+# 9. Box Plot IPK Beasiswa
+# ============================
+
+ggplot(df_beasiswa, aes(x = grup_beasiswa, y = ipk)) +
+  geom_boxplot(fill = "lightgreen") +
+  labs(title = "IPK: Penerima Beasiswa vs Non-Beasiswa",
+       x = "Status Beasiswa", y = "IPK") +
+ theme_minimal()
+```
+
+```{r}
+# ===================================
+# 10. Bar Plot Jumlah Mahasiswa Prodi
+# ===================================
+
+ggplot(df_clean, aes(x = grup_prodi)) +
+  geom_bar(fill = "steelblue") +
+  labs(title = "Distribusi Mahasiswa: Sains Data vs Non–Sains Data",
+       x = "Grup Prodi", y = "Jumlah Mahasiswa") +
+ theme_minimal()
+```
+
+```{r}
+# ===================================
+# 11. Kurva Kepadatan IPK Mahasiswa
+# ===================================
+
+ggplot(df_clean, aes(x = ipk)) +
+  geom_density(fill = "skyblue", alpha = 0.6) +
+  theme_minimal() +
+  labs(
+    title = "Kurva Kepadatan IPK Mahasiswa ITERA",
+    x = "IPK",
+    y = "Kepadatan"
+)
+```
+
+```{r}
+# ===================================
+# 12. Sebaran IPK Prodi
+# ===================================
+
+ggplot(df_clean, aes(x = grup_prodi, y = ipk)) +
+  geom_boxplot(outlier.shape = NA, fill = "orange", alpha = 0.7) +
+  geom_jitter(width = 0.15, alpha = 0.3) +
+  theme_minimal() +
+  labs(
+    title = "Sebaran IPK: Sains Data vs Non–Sains Data",
+    x = "Grup Program Studi",
+ y = "IPK"
+)
+```
+
+```{r}
+# ===================================
+# 13. Distribusi IPK Status Beasiswa
+# ===================================
+
+ggplot(df_beasiswa, aes(x = grup_beasiswa, y = ipk)) +
+  geom_violin(trim = FALSE, alpha = 0.6) +
+  geom_boxplot(width = 0.15, fill = "pink") +
+  theme_minimal() +
+  labs(
+    title = "Distribusi IPK Berdasarkan Status Beasiswa",
+    x = "Status Beasiswa",
+ y = "IPK"
+)
+```
+
+```{r}
+# ===================================
+# 14. Rata - Rata IPK 
+# ===================================
+
+library(dplyr)
+
+stat_prodi <- df_clean %>%
+  group_by(grup_prodi) %>%
+  summarise(
+    mean_ipk = mean(ipk),
+    sd_ipk   = sd(ipk),
+    n        = n(),
+    se       = sd_ipk / sqrt(n)
+  )
+
+ggplot(stat_prodi, aes(x = grup_prodi, y = mean_ipk)) +
+  geom_col(fill = "steelblue") +
+  geom_errorbar(aes(ymin = mean_ipk - se, ymax = mean_ipk + se),
+                width = 0.1) +
+  theme_minimal() +
+  labs(
+    title = "Rata-Rata IPK per Grup Prodi",
+    x = "Grup Prodi",
+    y = "Rata-Rata IPK"
+)
+```
+
+```{r}
+# ====================================
+# 15. Scatter Plot Garis Rata-Rata IPK
+# ====================================
+ggplot(df_clean, aes(x = 1:nrow(df_clean), y = ipk)) +
+  geom_point(alpha = 0.5, color = "steelblue") +
+  geom_hline(yintercept = mean(df_clean$ipk, na.rm = TRUE),
+             color = "red", size = 1) +
+  labs(
+    title = "Persebaran IPK Mahasiswa ITERA",
+    x = "Mahasiswa (Indeks)",
+    y = "IPK"
+  ) +
+ theme_minimal()
+```
+
+```{r}
+# ===================================
+# 16. QQ Plot Residual Distribusi IPK 
+# ===================================
+
+mod_norm <- lm(ipk ~ 1, data = df_clean)
+df_clean$resid_norm <- residuals(mod_norm)
+
+ggplot(df_clean, aes(sample = resid_norm)) +
+  stat_qq() +
+  stat_qq_line(color = "red") +
+  labs(
+    title = "QQ Plot Residual Distribusi IPK",
+    x = "Theoretical Quantiles",
+    y = "Sample Quantiles"
+  ) +
+ theme_minimal()
+```
+
+### Uji Hipotesis
+
+```{r}
+# ===================================
+# 17. Uji Hipotesis Satu Populasi
+# ===================================
+
+#H₀: mu = 3, H₁: mu < 3
+
+uji_satu <- t.test(df_clean$ipk,
+                   mu = 3,
+                   alternative = "greater")
+
+# Menampilkan hasil uji
+uji_satu
+
+# Interpretasi dan Kesimpulan
+cat("\nInterpretasi dan Kesimpulan untuk Uji Hipotesis Satu Populasi — Mahasiswa:\n")
+if (uji_satu$p.value < 0.05) {
+  cat("H₀ ditolak: Rata-rata IPK mahasiswa ITERA lebih besar dari 3.00.\n")
+  cat("Kesimpulan: Berdasarkan hasil uji t satu sampel, kita dapat menyimpulkan bahwa rata-rata IPK mahasiswa ITERA secara signifikan lebih besar dari 3.00.\n")
+} else {
+  cat("H₀ gagal ditolak: Tidak ada bukti cukup untuk mengatakan rata-rata IPK mahasiswa ITERA lebih besar dari 3.00.\n")
+  cat("Kesimpulan: Berdasarkan hasil uji t satu sampel, tidak ada bukti yang cukup untuk menunjukkan bahwa rata-rata IPK mahasiswa ITERA lebih besar dari3.00.\n")
+}
+
+```
+
+```{r}
+# =============================================
+# 17. Kurva t & p-value: Uji Satu Populasi
+# =============================================
+
+
+
+# Ambil t hitung dan derajat bebas dari hasil uji
+t_obs  <- as.numeric(uji_satu$statistic)
+df_t   <- as.numeric(uji_satu$parameter)
+
+# Buat grid nilai t dan densitasnya
+t_grid <- data.frame(
+  x    = seq(-4, 4, length.out = 400)
+)
+t_grid$dens <- dt(t_grid$x, df = df_t)
+
+# Plot kurva t + arsiran p-value (daerah x >= t_obs)
+library(ggplot2)
+
+ggplot(t_grid, aes(x = x, y = dens)) +
+  geom_line(color = "black") +
+  geom_area(data = subset(t_grid, x >= t_obs),
+            aes(y = dens),
+            fill = "red", alpha = 0.4) +
+  geom_vline(xintercept = t_obs, color = "red", linetype = "dashed") +
+  labs(
+    title = "Kurva t dan Daerah p-value\nUji Satu Populasi (H1: μ > 3)",
+    x = "t",
+    y = "Densitas"
+  ) +
+ theme_minimal()
+```
+
+```{r}
+# ========================================================
+# 18. Uji Dua Populasi IPK Prodi Sains Data VS Prodi Lain
+# ========================================================
+
+
+#H₀: μ_sains = μ_non_sains, H₁: μ_sains ≠ μ_non_sains
+
+uji_prodi <- t.test(ipk ~ grup_prodi, data = df_clean)
+
+# Menampilkan hasil uji
+uji_prodi
+
+# Interpretasi dan Kesimpulan
+cat("\nInterpretasi dan Kesimpulan untuk Uji Hipotesis Dua Populasi — Prodi:\n")
+if (uji_prodi$p.value < 0.05) {
+  cat("H₀ ditolak: Terdapat perbedaan signifikan antara rata-rata IPK Sains Data dan Non–Sains Data.\n")
+  cat("Kesimpulan: Berdasarkan hasil uji t dua sampel, terdapat perbedaan signifikan antara rata-rata IPK Sains Data dan Non-Sains Data.\n")
+} else {
+  cat("H₀ gagal ditolak: Tidak ada perbedaan signifikan antara rata-rata IPK Sains Data dan Non–Sains Data.\n")
+  cat("Kesimpulan: Berdasarkan hasil uji t dua sampel, tidak ada bukti yang cukup untuk mengatakan bahwa ada perbedaan rata-rata IPK antara mahasiswa Sains Data dan Non-Sains Data.\n")
+}
+```
+
+```{r}
+# =============================================
+# 17. Kurva t & p-value: Uji Dua Populasi Prodi
+# =============================================
+
+t_obs_prodi <- as.numeric(uji_prodi$statistic)
+df_prodi    <- as.numeric(uji_prodi$parameter)
+
+t_grid2 <- data.frame(
+  x    = seq(-4, 4, length.out = 400)
+)
+t_grid2$dens <- dt(t_grid2$x, df = df_prodi)
+
+ggplot(t_grid2, aes(x = x, y = dens)) +
+  geom_line(color = "black") +
+  # Arsiran dua ekor: |x| >= |t_obs_prodi|
+  geom_area(data = subset(t_grid2, abs(x) >= abs(t_obs_prodi)),
+            aes(y = dens),
+            fill = "red", alpha = 0.4) +
+  geom_vline(xintercept =  t_obs_prodi,  color = "red", linetype = "dashed") +
+  geom_vline(xintercept = -t_obs_prodi, color = "red", linetype = "dashed") +
+  labs(
+    title = "Kurva t dan Daerah p-value\nUji Dua Populasi (Prodi)",
+    x = "t",
+    y = "Densitas"
+  ) +
+ theme_minimal()
+```
+
+```{r}
+# ==========================
+# 19. Mean + 95% CI - Prodi
+# ==========================
+
+
+stat_prodi <- df_clean %>%
+  group_by(grup_prodi) %>%
+  summarise(
+    mean_ipk = mean(ipk),
+    sd_ipk = sd(ipk),
+    n = n(),
+    se = sd(ipk) / sqrt(n)
+  )
+
+stat_prodi
+```
+
+```{r}
+# ========================================================
+# 20. Uji Dua Populasi IPK Beasiswa VS Non Beasiswa
+# ========================================================
+
+# Uji Dua Populasi: H₀: μ_beasiswa = μ_non_beasiswa, H₁: μ_beasiswa ≠ μ_non_beasiswa
+uji_bea <- t.test(ipk ~ grup_beasiswa, data = df_beasiswa)
+
+# Menampilkan hasil uji
+uji_bea
+
+# Interpretasi dan Kesimpulan
+cat("\nInterpretasi dan Kesimpulan untuk Uji Hipotesis Dua Populasi — Beasiswa:\n")
+if (uji_bea$p.value < 0.05) {
+  cat("H₀ ditolak: Terdapat perbedaan signifikan antara rata-rata IPK Penerima Beasiswa dan Non-Beasiswa.\n")
+  cat("Kesimpulan: Berdasarkan hasil uji t dua sampel, ada perbedaan signifikan antara rata-rata IPK mahasiswa yang menerima beasiswa dan yang tidak.\n")
+} else {
+  cat("H₀ gagal ditolak: Tidak ada perbedaan signifikan antara rata-rata IPK Penerima Beasiswa dan Non-Beasiswa.\n")
+  cat("Kesimpulan: Berdasarkan hasil uji t dua sampel, tidak ada bukti cukup untuk mengatakan bahwa ada perbedaan rata-rata IPK antara penerima beasiswa dan non-beasiswa.\n")
+}
+```
+
+```{r}
+# ================================================
+# 17. Kurva t & p-value: Uji Dua Populasi Beasiswa
+# ================================================
+
+t_obs_bea <- as.numeric(uji_bea$statistic)
+df_bea    <- as.numeric(uji_bea$parameter)
+
+t_grid3 <- data.frame(
+  x    = seq(-4, 4, length.out = 400)
+)
+t_grid3$dens <- dt(t_grid3$x, df = df_bea)
+
+ggplot(t_grid3, aes(x = x, y = dens)) +
+  geom_line(color = "black") +
+  geom_area(data = subset(t_grid3, abs(x) >= abs(t_obs_bea)),
+            aes(y = dens),
+            fill = "red", alpha = 0.4) +
+  geom_vline(xintercept =  t_obs_bea,  color = "red", linetype = "dashed") +
+  geom_vline(xintercept = -t_obs_bea, color = "red", linetype = "dashed") +
+  labs(
+    title = "Kurva t dan Daerah p-value\nUji Dua Populasi (Beasiswa)",
+    x = "t",
+    y = "Densitas"
+  ) +
+ theme_minimal()
+```
+
+```{r}
+# ========================================================
+# 21. Mean + 95% CI - Beasiswa
+# ========================================================
+
+
+
+stat_bea <- df_beasiswa %>%
+  group_by(grup_beasiswa) %>%
+  summarise(
+    mean_ipk = mean(ipk),
+    sd_ipk = sd(ipk),
+    n = n(),
+    se = sd(ipk) / sqrt(n)
+  )
+
+stat_bea
+```
