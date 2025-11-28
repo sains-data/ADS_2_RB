@@ -26,11 +26,10 @@ Script menggunakan beberapa library berikut:
 4. library(ggplot2)
 
 # Struktur Repositori
-Tugas-Besar-ADS-2025/
-data : Dataset Tugas Besar ADS 2025.csv
-src : analysis.Rmd #Source code utama (R Markdown)
-output : grafik #Semua hasil visualisasi, hasil_analisis # Hasil uji statistik dan interpretasi
-README.md # Dokumentasi proyek
+1. data : Dataset Tugas Besar ADS 2025.csv
+2. src : analysis.Rmd #Source code utama (R Markdown)
+3. output : grafik #Semua hasil visualisasi, hasil_analisis # Hasil uji statistik dan interpretasi
+4. README.md # Dokumentasi proyek
 
 # Cara Menjalankan Script
 1. Clone repositori : git clone https://github.com/username/Tugas-Besar-ADS-2025.git
